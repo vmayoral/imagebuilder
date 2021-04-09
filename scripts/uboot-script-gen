@@ -276,7 +276,7 @@ then
 fi
 if [[ ! $DOM0_CMD =~ root= ]]
 then
-    if test "$LOAD_CMD" = "tftpb"
+    if test -z "$DOM0_ROOTFS"
     then
         DOM0_CMD="$DOM0_CMD root=/dev/ram0"
     else
@@ -322,6 +322,12 @@ do
     if test -z "${DOMU_VCPUS[$i]}"
     then
         DOMU_VCPUS[$i]=1
+    fi
+    if test "${DOMU_ROOTFS[$i]}"
+    then
+        echo "Cannot handle non-ramdisk rootfses for dom0less VMs."
+        echo "DomUs with rootfses on disk need to be created from dom0 using xl."
+        exit 1
     fi
     i=$(( $i + 1 ))
 done
