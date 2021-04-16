@@ -87,9 +87,25 @@ then
     exit 1
 fi
 
-while getopts ":w:d:c:o:h" opt
+while getopts ":w:d:c:t:o:h" opt
 do
     case ${opt} in
+    t )
+        case $OPTARG in
+        scsi )
+            LOAD_CMD="load scsi 0:1"
+            ;;
+        sd )
+            LOAD_CMD="load mmc 0:1"
+            ;;
+        tftp )
+            LOAD_CMD="tftpb"
+            ;;
+        * )
+            LOAD_CMD="$OPTARG"
+            ;;
+        esac
+        ;;
     w )
         DESTDIR=$OPTARG
         ;;
