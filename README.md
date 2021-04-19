@@ -127,7 +127,7 @@ as follows:
 - DOMU_ROOTFS[number] specifies the DomU rootfs to use.
 
 The provided rootfs should not be a u-boot binary. The supported
-formarts are:
+formats are:
 
 - cpio.gz
 - tar.gz
