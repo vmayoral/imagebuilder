@@ -54,6 +54,8 @@ Where:
 
 - DEVICE_TREE specifies the DTB file to load.
 
+- BOOTBIN (optional) specifies the boot BIN file to load.
+
 - XEN specifies the Xen hypervisor binary to load. Note that it has to
   be a regular Xen binary, not a u-boot binary.
 
