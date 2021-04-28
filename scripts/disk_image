@@ -113,7 +113,7 @@ function add_partition()
 
     if [[ $rootfs = *.cpio.gz ]]
     then
-        cat "${UBOOT_OUT_ABS}/$rootfs" | gunzip | cpio -id
+        cat "${UBOOT_OUT_ABS}/$rootfs" | gunzip | cpio -id 2> /dev/null
         _part_size=$(du -sb| awk '{print $1}')
     elif [[ $rootfs = *.tar.gz ]]
     then
@@ -157,7 +157,7 @@ function write_rootfs()
 
     if [[ $rootfs = *.cpio.gz ]]
     then
-        cat "${UBOOT_OUT_ABS}/$rootfs" | gunzip | cpio -id
+        cat "${UBOOT_OUT_ABS}/$rootfs" | gunzip | cpio -id 2> /dev/null
     elif [[ $rootfs = *.tar.gz ]]
     then
         tar -xf "${UBOOT_OUT_ABS}/$rootfs"
@@ -380,7 +380,7 @@ i=0
 j=1
 while test $i -lt $_npart
 do
-    mkfs.ext4 -L vos_$j -F /dev/mapper/diskimage$j
+    mkfs.ext4 -L vos_$j -F /dev/mapper/diskimage$j 2> /dev/null
     i=$(( $i + 1 ))
     j=$(( $j + 1 ))
 done
