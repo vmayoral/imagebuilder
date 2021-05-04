@@ -388,18 +388,6 @@ do
     i=$(( $i + 1 ))
 done
 
-# # create GPT partition table
-# sgdisk -og $IMG
-#
-# i=0
-# j=1
-# while test $i -lt $_npart
-# do
-#     sgdisk -n $j:${_sector_start[$i]}:${_sector_end[$i]} -c $j:"Linux""$j" -t $j:8300 $IMG
-#     i=$(( $i + 1 ))
-#     j=$(( $j + 1 ))
-# done
-
 # find the first available loop device
 _loop_dev=$(losetup -f)
 
@@ -435,15 +423,6 @@ do
     i=$(( $i + 1 ))
     j=$(( $j + 1 ))
 done
-
-# i=0
-# j=1
-# while test $i -lt $_npart
-# do
-#     mkfs.ext4 -L vos_$j -F /dev/mapper/diskimage$j 2> /dev/null
-#     i=$(( $i + 1 ))
-#     j=$(( $j + 1 ))
-# done
 
 # create mount point and mount disk1
 mkdir -p ${DESTDIR}/part/disk1
