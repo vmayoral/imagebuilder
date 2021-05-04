@@ -3,7 +3,7 @@
 # This helps to see what is going on
 set -e
 
-PROG_REQ=( kpartx mkfs.ext4 losetup sgdisk readlink awk )
+PROG_REQ=( kpartx mkfs.ext4 losetup sgdisk readlink awk parted )
 SLACK=128
 
 function check_depends()
@@ -137,7 +137,7 @@ function add_partition()
     _part_size=$(( $SLACK*1024*1024 + $_part_size ))
     _part_size=$(( $_part_size / 1024 / 1024 ))
     echo PART size: "$_part_size"MB
-    
+
     prev=$(( $_npart - 1 ))
     _sector_start[$_npart]=$(( ${_sector_end[$prev]} + 1 ))
     _sector_end[$_npart]=$(( $_part_size * 1024 * 1024 / $_sector_size + ${_sector_start[$_npart]} - 1))
@@ -154,7 +154,7 @@ function write_rootfs()
     # create mount point and mount diskn
     mkdir -p ${DESTDIR}/part/disk$j
     mount -t ext4 /dev/mapper/diskimage$j $DESTDIR/part/disk$j
-    
+
     # Extract rootfs cpio archive into `.../part/vos_$j`
     cd ${DESTDIR}/part/disk$j
 
@@ -168,7 +168,7 @@ function write_rootfs()
         echo "Ignoring $rootfs: unsupported file format. Use cpio.gz or tar.gz."
     fi
 
-    cd -  
+    cd -
     # umount
     sync
     umount $DESTDIR/part/disk$j
@@ -357,17 +357,48 @@ _tot_size=$(( $_tot_size + 16 ))
 # 528 MiB (256 + 256 + 16)
 truncate $IMG -s "$_tot_size"M
 
-# create GPT partition table
-sgdisk -og $IMG
+# create a Master Boot Record (MBR) and set the standard BIOS partition table
+echo -e "Y\n" | parted $IMG mklabel msdos
 
+# configure sectors, heads and cylinders
+echo -e "x\nh\n255\ns\n63\nc\n\nr\nw\n" | fdisk $IMG
+
+# create partitions
 i=0
 j=1
 while test $i -lt $_npart
 do
-    sgdisk -n $j:${_sector_start[$i]}:${_sector_end[$i]} -c $j:"Linux""$j" -t $j:8300 $IMG
+    echo -e "n\np\n$j\n${_sector_start[$i]}\n${_sector_end[$i]}\nw\n" | fdisk $IMG
     i=$(( $i + 1 ))
     j=$(( $j + 1 ))
 done
+
+# bootable flag in p1
+echo -e "a\n1\nw\n" | fdisk $IMG
+
+# partition types
+## first one's exceptional, "c" is W95 FAT32 (LBA)
+echo -e "t\n1\nc\nw\n" | fdisk $IMG
+## "83" is Linux
+i=1
+while test $i -lt $_npart
+do
+    j=$(( $i + 1 ))  # the actual partition in the table
+    echo -e "t\n$j\n83\nw\n" | fdisk $IMG
+    i=$(( $i + 1 ))
+done
+
+# # create GPT partition table
+# sgdisk -og $IMG
+#
+# i=0
+# j=1
+# while test $i -lt $_npart
+# do
+#     sgdisk -n $j:${_sector_start[$i]}:${_sector_end[$i]} -c $j:"Linux""$j" -t $j:8300 $IMG
+#     i=$(( $i + 1 ))
+#     j=$(( $j + 1 ))
+# done
 
 # find the first available loop device
 _loop_dev=$(losetup -f)
@@ -393,8 +424,11 @@ do
     sleep 2
 done
 
-i=0
-j=1
+# format partitions
+sudo mkfs.vfat -F 32 -n boot /dev/mapper/diskimage1
+
+i=1
+j=2
 while test $i -lt $_npart
 do
     mkfs.ext4 -L vos_$j -F /dev/mapper/diskimage$j 2> /dev/null
@@ -402,9 +436,18 @@ do
     j=$(( $j + 1 ))
 done
 
+# i=0
+# j=1
+# while test $i -lt $_npart
+# do
+#     mkfs.ext4 -L vos_$j -F /dev/mapper/diskimage$j 2> /dev/null
+#     i=$(( $i + 1 ))
+#     j=$(( $j + 1 ))
+# done
+
 # create mount point and mount disk1
 mkdir -p ${DESTDIR}/part/disk1
-mount -t ext4 /dev/mapper/diskimage1 $DESTDIR/part/disk1
+mount -t vfat /dev/mapper/diskimage1 $DESTDIR/part/disk1
 
 # only copy over files that were counted for the partition size
 cd "$UBOOT_OUT"
@@ -422,7 +465,7 @@ then
     cp --parents "$XEN" "${DESTDIR_ABS}/part/disk1/"
 fi
 if test "${BOOTBIN}"
-then    
+then
     cp --parents "$BOOTBIN" "${DESTDIR_ABS}/part/disk1/"
 fi
 
