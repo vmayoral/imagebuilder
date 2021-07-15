@@ -36,6 +36,9 @@ DOM0_KERNEL="Image-dom0"
 DOM0_CMD="console=hvc0 earlycon=xen earlyprintk=xen clk_ignore_unused"
 DOM0_RAMDISK="dom0-ramdisk.cpio"
 
+NUM_DT_OVERLAY=1
+DT_OVERLAY[0]="host_dt_overlay.dtbo"
+
 NUM_DOMUS=2
 DOMU_KERNEL[0]="zynqmp-dom1/Image-domU"
 DOMU_RAMDISK[0]="zynqmp-dom1/domU-ramdisk.cpio"
@@ -71,6 +74,12 @@ Where:
 
 - DOM0_RAMDISK specifies the Dom0 ramdisk to use. Note that it should be
   a regular ramdisk cpio.gz file, not a u-boot binary.
+
+- NUM_DT_OVERLAY specifies the number of host device tree overlays to be
+  added at boot time in u-boot
+
+- DT_OVERLAY[number] specifies the path of the hots device tree overlays
+  to be added at boot time in u-boot
 
 - NUM_DOMUS specifies how many Dom0-less DomUs to load
 
