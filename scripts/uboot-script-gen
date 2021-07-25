@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# # This helps to see what is going on
+# set -x
+# PS4='${LINENO}: '
+
 offset=$((2*1024*1024))
 filesize=0
 prog_req=(mkimage file fdtput)
