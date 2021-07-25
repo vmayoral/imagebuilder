@@ -181,7 +181,7 @@ function load_file()
 
     local relative_path="$(realpath --relative-to=$PWD $filename)"
 
-    if test $LOAD_CMD = "imxtract"
+    if test "$LOAD_CMD" = "imxtract"
     then
         echo "$LOAD_CMD \$fit_addr $fit_scr_name $memaddr" >> $UBOOT_SOURCE
     else
@@ -435,9 +435,9 @@ fi
 # tftp or move the files to a partition
 cd "$uboot_dir"
 
-if test $LOAD_CMD = "fit_std" || test $LOAD_CMD = "imxtract"
+if test "$LOAD_CMD" = "fit_std" || test "$LOAD_CMD" = "imxtract"
 then
-     if ! test $FDTEDIT && test $LOAD_CMD = "fit_std"
+     if ! test $FDTEDIT && test "$LOAD_CMD" = "fit_std"
      then
          FDTEDIT=${DEVICE_TREE%.dtb}
          FDTEDIT+=-fit.dtb
@@ -456,7 +456,7 @@ fi
 
 rm -f $UBOOT_SOURCE $UBOOT_SCRIPT
 
-if test $LOAD_CMD = "imxtract"
+if test "$LOAD_CMD" = "imxtract"
 then
     echo 'fit_addr=$fileaddr' >>  $UBOOT_SOURCE
 fi
@@ -482,7 +482,7 @@ dom0_kernel_addr=$memaddr
 load_file $DOM0_KERNEL "dom0_linux"
 dom0_kernel_size=$filesize
 
-if test "$DOM0_RAMDISK" && [[ $LOAD_CMD = "tftpb" ]]
+if test "$DOM0_RAMDISK" && [[ "$LOAD_CMD" = "tftpb" ]]
 then
     check_compressed_file_type $DOM0_RAMDISK "cpio archive"
     dom0_ramdisk_addr=$memaddr
@@ -555,7 +555,7 @@ if test "$fit"
 then
     # create start along with necessary binaries
     load_files="\"dom0_linux\""
-    if test $LOAD_CMD = "imxtract"
+    if test "$LOAD_CMD" = "imxtract"
     then
         its_dt="$DEVICE_TREE"
     else
@@ -692,7 +692,7 @@ then
     fi
     fdt_line+=";"
     # script for fit
-    if test $LOAD_CMD = "imxtract"
+    if test "$LOAD_CMD" = "imxtract"
     then
         cat >> "$its_file" <<- EOF
         boot_scr {
@@ -747,7 +747,7 @@ fi
 if test "$fit"
 then
     echo "Generated uboot FIT image  $fit, to be loaded at or after address $fit_addr:"
-    if test $LOAD_CMD = "imxtract"
+    if test "$LOAD_CMD" = "imxtract"
     then
         echo "tftpb/load mmc 0:1/etc $fit_addr $fit; source $fit_addr:boot_scr"
     else
