@@ -373,8 +373,17 @@ do
     j=$(( $j + 1 ))
 done
 
+#
 # bootable flag in p1
-echo -e "a\n1\nw\n" | fdisk $IMG
+#
+# NOTE: when there's only one partition, there's no need to pass the number (1), 
+# and instead, fdisk automatically makes the first partition bootable.
+# Issue in here is that this command will then lead to
+#       "1: unknown command"
+# This will happen whenever DOM0_RAMDISK is set and no DOMUs are available 
+# (leading to only one partition). The error itself can be ignored but for the 
+# sake of keeping things tidy, we're redirecting stderr.
+echo -e "a\n1\nw\n" | fdisk $IMG 2> /dev/null
 
 # partition types
 ## first one's exceptional, "c" is W95 FAT32 (LBA)
@@ -433,6 +442,12 @@ cd "$UBOOT_OUT"
 cp --parents "$DOM0_KERNEL" "${DESTDIR_ABS}/part/disk1/"
 cp --parents "$DEVICE_TREE" "${DESTDIR_ABS}/part/disk1/"
 cp --parents "$UBOOT_SCRIPT" "${DESTDIR_ABS}/part/disk1/"
+
+# optional, DOM0_RAMDISK
+if test "${DOM0_RAMDISK}"
+then
+    cp --parents "$DOM0_RAMDISK" "${DESTDIR_ABS}/part/disk1/"
+fi
 
 # optional items, empowers production of non-Xen images
 if test "${UBOOT_SOURCE}"
