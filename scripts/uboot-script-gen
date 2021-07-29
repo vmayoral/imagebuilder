@@ -371,7 +371,6 @@ then
     else
         DEV=${LOAD_CMD%:*}
         DEV=${DEV##* }
-        # DEV=0
         PAR=${LOAD_CMD#*:}
 
         if [ -z "$DEV" ] || [ -z "$PAR" ]
@@ -531,10 +530,6 @@ do
     i=$(( $i + 1 ))
 done
 
-# # copy KV260 ramdisk.cpio.gz.u-boot
-# kv260_ramdisk_memaddr=$memaddr
-# load_file ramdisk.cpio.gz.u-boot "host_ramdisk_kv260"
-
 if test $NUM_DT_OVERLAY && test $NUM_DT_OVERLAY -gt 0
 then
     i=0
@@ -560,8 +555,6 @@ device_tree_editing $device_tree_addr
 # disable device tree reloation
 echo "setenv fdt_high 0xffffffffffffffff" >> $UBOOT_SOURCE
 echo "booti $xen_addr - $device_tree_addr" >> $UBOOT_SOURCE
-# echo "booti $xen_addr $kv260_ramdisk_memaddr $device_tree_addr" >> $UBOOT_SOURCE
-
 
 if test "$fit"
 then
