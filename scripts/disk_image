@@ -449,6 +449,17 @@ then
     cp --parents "$DOM0_RAMDISK" "${DESTDIR_ABS}/part/disk1/"
 fi
 
+# copy DT_OVERLAY, if exist
+if test $NUM_DT_OVERLAY && test $NUM_DT_OVERLAY -gt 0
+then
+    i=0
+    while test $i -lt $NUM_DT_OVERLAY
+    do
+        cp --parents "${DT_OVERLAY[$i]}" "${DESTDIR_ABS}/part/disk1/"
+        i=$(( $i + 1 ))
+    done
+fi
+
 # optional items, empowers production of non-Xen images
 if test "${UBOOT_SOURCE}"
 then
